@@ -1,6 +1,5 @@
 const express = require('express');
 const multer = require('multer');
-const cors = require('cors');
 const ffmpeg = require('fluent-ffmpeg');
 const ffmpegPath = require('@ffmpeg-installer/ffmpeg').path;
 const path = require('path');
@@ -12,8 +11,14 @@ ffmpeg.setFfmpegPath(ffmpegPath);
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Allow requests from any origin (your Android app)
-app.use(cors());
+// Explicit CORS — allow all origins including Android WebView (file://)
+app.use(function(req, res, next) {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Accept');
+  if (req.method === 'OPTIONS') { res.sendStatus(200); return; }
+  next();
+});
 
 // Use system temp directory for uploads
 const upload = multer({
